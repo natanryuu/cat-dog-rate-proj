@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:www.pet.gov.tw)",
-      "WebFetch(domain:data.gov.tw)"
+      "WebFetch(domain:data.gov.tw)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python3 -m pip install requests --break-system-packages)",
+      "Bash(python3 -m pip install pandas --break-system-packages)"
     ]
   }
 }
