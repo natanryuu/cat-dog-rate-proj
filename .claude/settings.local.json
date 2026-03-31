@@ -6,7 +6,11 @@
       "Bash(pip install:*)",
       "Bash(pip3 install:*)",
       "Bash(python3 -m pip install requests --break-system-packages)",
-      "Bash(python3 -m pip install pandas --break-system-packages)"
+      "Bash(python3 -m pip install pandas --break-system-packages)",
+      "Bash(python3 -c \"import pandas as pd; df = pd.read_excel\\(''/Users/danniryu/Desktop/proj/cat-dog-rate-proj/data_raw/age/108年.ods'', engine=''odf'', nrows=5\\); print\\(df.to_string\\(\\)\\)\")",
+      "Bash(python3 -m pip install odfpy --break-system-packages)",
+      "Bash(python3 -c \"import pandas as pd; df = pd.read_excel\\(''''/Users/danniryu/Desktop/proj/cat-dog-rate-proj/data_raw/age/108年.ods'''', engine=''''odf'''', nrows=5\\); print\\(df.columns.tolist\\(\\)\\); print\\(df.head\\(\\)\\)\")",
+      "Bash(python3 -c \":*)"
     ]
   }
 }

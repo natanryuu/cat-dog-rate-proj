@@ -53,7 +53,7 @@ def download_real_estate():
     # 研究期間 2019-2024 = 民國 108-113，每年 4 季
     # 額外下載 104-107 備用（如果要擴展到 2015-2024）
     seasons = []
-    for roc_year in range(108, 114):   # 108-113 = 2019-2024（必要）
+    for roc_year in range(104, 114):   # 104-113 = 2015-2024
         for s in range(1, 5):
             seasons.append(f"{roc_year}S{s}")
     
@@ -260,18 +260,67 @@ def download_age_data():
     except Exception as e:
         print(f"  ⚠ API 失敗：{e}")
     
-    # 方法 B：民政局 ODS（完整 108-113 年）
-    print(f"""
-  📋 補充完整資料（108-113 年）請手動下載 ODS：
-  
+    # 方法 B：解析已存在的 ODS 檔案
+    ods_files = sorted([f for f in os.listdir(age_dir) if f.endswith('.ods')])
+    if not ods_files:
+        print(f"""
+  📋 找不到 ODS 檔案，請手動下載後放到 data_raw/age/：
   網址：https://ca.gov.taipei/News_Content.aspx?n=8693DC9620A1AABF&sms=D19E9582624D83CB&s=78DC4B104D9D374E
-  
-  頁面上有「按行政區分」的連結，從 108 年到 113 年各一份 ODS。
-  下載後存到 data_raw/age/ 資料夾。
-  
-  ODS 可以用 pandas 讀取：
-    pd.read_excel('108年.ods', engine='odf')
-    """)
+        """)
+        return
+
+    print(f"\n  偵測到 {len(ods_files)} 個 ODS 檔案，開始解析...")
+    records = []
+
+    for fname in ods_files:
+        roc_year_str = fname.replace('年.ods', '')
+        try:
+            roc_year = int(roc_year_str)
+        except ValueError:
+            print(f"  [跳過] 無法解析年份：{fname}")
+            continue
+
+        ad_year = roc_year + 1911
+        fpath = os.path.join(age_dir, fname)
+
+        try:
+            df = pd.read_excel(fpath, engine='odf', header=None)
+            # row 1 = header, rows 2+ = data；只取「計」（性別欄 == '計'）
+            data = df.iloc[2:].copy()
+            data.columns = range(data.shape[1])
+            data = data[data[1] == '計'].copy()
+
+            for _, row in data.iterrows():
+                district = str(row[0]).replace('\u3000', '').replace(' ', '')
+                if district in ('總計', '總  計', '合計'):
+                    continue
+                # 清理區名（有時格式為 "松 山 區"）
+                district = district.replace('\xa0', '').strip()
+                try:
+                    total_pop = int(row[2])
+                    pop_0_4   = int(row[3])
+                except (ValueError, TypeError):
+                    continue
+                records.append({
+                    'ad_year':   ad_year,
+                    'roc_year':  roc_year,
+                    'district':  district,
+                    'total_pop': total_pop,
+                    'pop_0_4':   pop_0_4,
+                    'ratio_0_4': round(pop_0_4 / total_pop, 6) if total_pop > 0 else None,
+                })
+
+            print(f"  ✅ {fname}")
+        except Exception as e:
+            print(f"  ❌ {fname}：{e}")
+
+    if records:
+        out_df = pd.DataFrame(records).sort_values(['ad_year', 'district'])
+        out_path = os.path.join(age_dir, 'age_district_panel.csv')
+        out_df.to_csv(out_path, index=False, encoding='utf-8-sig')
+        print(f"\n  ✅ 已輸出 {len(out_df)} 筆 → {out_path}")
+    else:
+        print("  ⚠ 沒有成功解析任何資料")
 
 
 # ═══════════════════════════════════════════════════════
