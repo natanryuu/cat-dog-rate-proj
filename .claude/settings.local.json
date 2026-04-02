@@ -12,7 +12,9 @@
       "Bash(python3 -c \"import pandas as pd; df = pd.read_excel\\(''''/Users/danniryu/Desktop/proj/cat-dog-rate-proj/data_raw/age/108年.ods'''', engine=''''odf'''', nrows=5\\); print\\(df.columns.tolist\\(\\)\\); print\\(df.head\\(\\)\\)\")",
       "Bash(python3 -c \":*)",
       "WebFetch(domain:www.ris.gov.tw)",
-      "Bash(ls /Users/danniryu/Desktop/proj/cat-dog-rate-proj/*.csv)"
+      "Bash(ls /Users/danniryu/Desktop/proj/cat-dog-rate-proj/*.csv)",
+      "Bash(curl -s \"https://www.ris.gov.tw/rs-opendata/api/v1/datastore/ODRP019/105?COUNTY=%E8%87%BA%E5%8C%97%E5%B8%82&PAGE=1\")",
+      "WebSearch"
     ]
   }
 }
