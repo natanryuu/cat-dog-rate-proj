@@ -1,10 +1,10 @@
 """
 戶政司 Open API - ODRP019「戶數、人口數按戶別及性別」
-拉取臺北市 12 行政區（里級），民國 105～114 年資料
-輸出：data_raw/odrp019_taipei_105_114.csv
+拉取臺北市 12 行政區（里級），民國 104～114 年資料
+輸出：data_raw/odrp019_taipei_104_114.csv
 
 注意：
-  - 105 年需要另外從 data_raw/single/opendata105Y010.csv 匯入（API 無此年度）
+  - 104~105 年需要另外從 data_raw/single/opendata{104,105}Y010.csv 匯入（API 無此年度）
   - 113 年起 API 欄位名稱從英文改為中文，且 COUNTY 參數失效，
     需抓取全國資料後自行篩選臺北市
 """
@@ -19,9 +19,14 @@ import sys
 # ============================================================
 BASE_URL = "https://www.ris.gov.tw/rs-opendata/api/v1/datastore/ODRP019"
 COUNTY = "臺北市"
-YEARS = list(range(105, 115))  # 105~114（民國）
-OUTPUT_CSV = "data_raw/odrp019_taipei_105_114.csv"
-LOCAL_105_CSV = "data_raw/single/opendata105Y010.csv"
+YEARS = list(range(104, 115))  # 104~114（民國）
+OUTPUT_CSV = "data_raw/odrp019_taipei_104_114.csv"
+
+# 104~105 年 API 無資料，需從本機 CSV 匯入
+LOCAL_CSV_MAP = {
+    104: "data_raw/single/opendata104Y010.csv",
+    105: "data_raw/single/opendata105Y010.csv",
+}
 
 # 臺北市 12 行政區（用來驗證資料完整性）
 TAIPEI_DISTRICTS = [
@@ -144,12 +149,16 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def load_local_105() -> pd.DataFrame:
-    """從本機 CSV 讀取 105 年資料（API 無此年度）。"""
+def load_local_csv(year: int) -> pd.DataFrame:
+    """從本機 CSV 讀取指定年度資料（API 無此年度）。"""
+    path = LOCAL_CSV_MAP.get(year)
+    if not path:
+        print(f"  [!] 無本機檔案對應 {year} 年")
+        return pd.DataFrame()
     try:
-        df = pd.read_csv(LOCAL_105_CSV, encoding="utf-8-sig", dtype=str)
+        df = pd.read_csv(path, encoding="utf-8-sig", dtype=str)
     except FileNotFoundError:
-        print(f"  [!] 找不到 {LOCAL_105_CSV}，跳過 105 年")
+        print(f"  [!] 找不到 {path}，跳過 {year} 年")
         return pd.DataFrame()
 
     df = df.rename(columns=COL_MAP_ZH_TO_EN)
@@ -159,7 +168,7 @@ def load_local_105() -> pd.DataFrame:
     keep = list(COL_MAP_ZH_TO_EN.values())
     df = df[[c for c in keep if c in df.columns]]
 
-    print(f"  -> 從本機檔案讀取 105 年臺北市：{len(df)} 筆")
+    print(f"  -> 從本機檔案讀取 {year} 年臺北市：{len(df)} 筆")
     return df
 
 
@@ -174,8 +183,8 @@ def main():
     for year in YEARS:
         print(f"\n[{year}] ({year + 1911})")
 
-        if year == 105:
-            df_year = load_local_105()
+        if year in LOCAL_CSV_MAP:
+            df_year = load_local_csv(year)
         else:
             records = fetch_year(year)
             if not records:
