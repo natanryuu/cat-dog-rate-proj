@@ -21,7 +21,9 @@ warnings.filterwarnings('ignore')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_DIR = os.path.join(BASE_DIR, 'data_raw')
+DATA_DIR = os.path.join(BASE_DIR, '..', 'data')
 os.makedirs(RAW_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
 
 TAIPEI_DISTRICTS = [
     '松山區', '信義區', '大安區', '中山區', '中正區', '大同區',
@@ -177,7 +179,7 @@ def download_household_data():
         
         if all_data:
             df = pd.DataFrame(all_data)
-            out_path = os.path.join(RAW_DIR, 'household_by_type_govdata.csv')
+            out_path = os.path.join(DATA_DIR, 'household_by_type_govdata.csv')
             df.to_csv(out_path, index=False, encoding='utf-8-sig')
             print(f"  ✅ 下載 {len(df)} 筆，儲存至 {out_path}")
             return
@@ -316,7 +318,7 @@ def download_age_data():
 
     if records:
         out_df = pd.DataFrame(records).sort_values(['ad_year', 'district'])
-        out_path = os.path.join(age_dir, 'age_district_panel.csv')
+        out_path = os.path.join(DATA_DIR, 'age_district_panel.csv')
         out_df.to_csv(out_path, index=False, encoding='utf-8-sig')
         print(f"\n  ✅ 已輸出 {len(out_df)} 筆 → {out_path}")
     else:
@@ -432,7 +434,7 @@ def process_real_estate_to_panel():
             ).reset_index()
             panel_buy = panel_buy.round(2)
             
-            out = os.path.join(RAW_DIR, 'iv1_housing_size_panel.csv')
+            out = os.path.join(DATA_DIR, 'iv1_housing_size_panel.csv')
             panel_buy.to_csv(out, index=False, encoding='utf-8-sig')
             print(f"  ✅ IV₁ 住宅坪數：{len(panel_buy)} 筆 → {out}")
     else:
@@ -481,7 +483,7 @@ def process_real_estate_to_panel():
             combined = pd.concat(all_rent, ignore_index=True)
             panel_rent = combined.groupby(['year', 'district']).size().reset_index(name='rental_count')
             
-            out = os.path.join(RAW_DIR, 'iv4_rental_count_panel.csv')
+            out = os.path.join(DATA_DIR, 'iv4_rental_count_panel.csv')
             panel_rent.to_csv(out, index=False, encoding='utf-8-sig')
             print(f"  ✅ IV₄ 租賃件數：{len(panel_rent)} 筆 → {out}")
     else:

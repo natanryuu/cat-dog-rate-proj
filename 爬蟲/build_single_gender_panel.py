@@ -61,8 +61,8 @@ panel = (agg[agg['year'].between(2015, 2024)]
          .sort_values(['year', 'district'])
          .reset_index(drop=True))
 
-panel.to_csv("data_raw/iv3_single_gender_panel.csv", index=False)
-print(f"Saved: data_raw/iv3_single_gender_panel.csv  ({len(panel)} rows)")
+panel.to_csv("data/single_gender_panel.csv", index=False)
+print(f"Saved: data/single_gender_panel.csv  ({len(panel)} rows)")
 
 # ── 基礎統計 ─────────────────────────────────────────────
 print("\n=== 各區單身男女差異摘要 (2015-2024 平均) ===")

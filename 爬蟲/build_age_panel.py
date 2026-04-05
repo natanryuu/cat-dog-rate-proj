@@ -10,7 +10,7 @@ import re
 import sys
 
 INPUT_DIR = "data_raw/age"
-OUTPUT_CSV = "data_raw/age/age_district_panel.csv"
+OUTPUT_CSV = "data/age_district_panel.csv"
 
 TAIPEI_DISTRICTS = [
     "松山區", "信義區", "大安區", "中山區", "中正區", "大同區",

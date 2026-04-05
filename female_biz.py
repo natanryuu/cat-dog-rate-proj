@@ -61,5 +61,5 @@ for district in districts:
 
 df = pd.DataFrame(results).drop_duplicates(subset=["place_id"])
 print(f"\n✅ 共 {len(df)} 家店")
-df.to_csv("taipei_female_business.csv", index=False, encoding="utf-8-sig")
-print("已存成 taipei_female_business.csv")
+df.to_csv("data/taipei_female_business.csv", index=False, encoding="utf-8-sig")
+print("已存成 data/taipei_female_business.csv")

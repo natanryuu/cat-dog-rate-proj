@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-fetch_edu_mig.py — 台北市 12 行政區: 教育程度 + 遷徙
-=====================================================
+fetch_edu_mig.py — 台北市 12 行政區: 教育程度
+=============================================
 
 變數
 ----
 1. edu_ratio      大專以上學歷比       ODRP020 (yearly, API 106-114)
-2. net_migration  遷入遷出淨移動數     ODRP011 (monthly, 107+) / ODRP002 (106)
 
 ⚠ 104-105 年 (2015-2016) 戶政司 API 無資料，教育程度改從本地 CSV 讀取
   (data_raw/education/opendata104Y050-1.csv, opendata105Y050.csv)
@@ -15,13 +14,10 @@ fetch_edu_mig.py — 台北市 12 行政區: 教育程度 + 遷徙
 ----
     python fetch_edu_mig.py                  # 全部跑
     python fetch_edu_mig.py --probe          # 只 probe 欄位
-    python fetch_edu_mig.py --only edu       # 只跑 edu_ratio
-    python fetch_edu_mig.py --only mig       # 只跑 net_migration
 
 Output
 ------
     data/edu_ratio_panel.csv
-    data/net_mig_panel.csv
 """
 
 import argparse
@@ -44,8 +40,6 @@ TAIPEI_DISTRICTS = [
 
 PANEL_YEARS_ROC = list(range(104, 115))   # 104-114 → 2015-2025
 PANEL_YEARS_AD  = [y + 1911 for y in PANEL_YEARS_ROC]
-
-MIG_ODRP011_START = 107   # 107+ → ODRP011;  106 → ODRP002
 
 BASE_RIS = "https://www.ris.gov.tw/rs-opendata/api/v1/datastore"
 DATA_DIR = Path("data")
@@ -315,134 +309,15 @@ def fetch_edu_ratio() -> pd.DataFrame:
     return result
 
 
-# ════════════════════════════════════════════════════════════
-# 2. 遷入遷出淨移動  (ODRP011 / ODRP002)
-# ════════════════════════════════════════════════════════════
-def fetch_net_migration() -> pd.DataFrame:
-    """
-    月報 × 12 個月累加 → 年度遷入、遷出、淨移動
-    107+ 用 ODRP011 (含區域代碼), 106 用 ODRP002
-    """
-    print("\n" + "─"*60)
-    print("🚚 遷入遷出淨移動  (ODRP011 / ODRP002)")
-    print("─"*60)
-
-    rows = []
-    for roc_y in PANEL_YEARS_ROC:
-        ad_y = roc_y + 1911
-        print(f"\n  === 民國 {roc_y} ({ad_y}) ===")
-
-        annual_in  = {}
-        annual_out = {}
-        first_month_done = False
-
-        for m in range(1, 13):
-            yyymm = f"{roc_y}{m:02d}"
-            endpoint = (f"ODRP011/{yyymm}" if roc_y >= MIG_ODRP011_START
-                        else f"ODRP002/{yyymm}")
-
-            print(f"    {yyymm} ...", end=" ", flush=True)
-            data = fetch_ris_all_pages(
-                endpoint, params={"COUNTY": "臺北市"})
-            print(f"{len(data)} 筆", end="")
-
-            if not data:
-                print(" ⚠跳過")
-                continue
-            print()
-
-            df = pd.DataFrame(data)
-            df.columns = [c.lstrip("\ufeff") for c in df.columns]
-
-            # 首月印欄位
-            if not first_month_done:
-                first_month_done = True
-                print(f"    欄位: {list(df.columns)}")
-
-            # town 欄位
-            town_col = _find_col(df, ["town", "TOWN", "site_id"])
-            if town_col is None:
-                for c in df.columns:
-                    if df[c].astype(str).str.contains("區").any():
-                        town_col = c
-                        break
-            if town_col is None:
-                continue
-            df[town_col] = df[town_col].astype(str).str.replace("臺北市", "", n=1)
-
-            # 遷入/遷出欄位
-            in_cols = [c for c in df.columns
-                       if any(kw in c.lower()
-                              for kw in ["move_in", "movein", "遷入"])
-                       and "out" not in c.lower() and "遷出" not in c]
-            out_cols = [c for c in df.columns
-                        if any(kw in c.lower()
-                               for kw in ["move_out", "moveout", "遷出"])]
-
-            # 退路: total 欄
-            if not in_cols:
-                in_cols = [c for c in df.columns
-                           if "in" in c.lower() and "total" in c.lower()]
-            if not out_cols:
-                out_cols = [c for c in df.columns
-                            if "out" in c.lower() and "total" in c.lower()]
-
-            if not in_cols or not out_cols:
-                if m == 1:
-                    print(f"    ⚠ 遷入/遷出欄位辨識失敗，--probe 檢查")
-                continue
-
-            if not first_month_done or m == 1:
-                print(f"    → 遷入: {in_cols}")
-                print(f"    → 遷出: {out_cols}")
-
-            for c in in_cols + out_cols:
-                df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0)
-
-            for dist, g in df.groupby(town_col):
-                d = str(dist).strip()
-                if d not in TAIPEI_DISTRICTS:
-                    continue
-                annual_in[d]  = annual_in.get(d, 0) + g[in_cols].sum().sum()
-                annual_out[d] = annual_out.get(d, 0) + g[out_cols].sum().sum()
-
-            time.sleep(POLITE_DELAY)
-
-        for dist in TAIPEI_DISTRICTS:
-            mi = annual_in.get(dist, 0)
-            mo = annual_out.get(dist, 0)
-            rows.append({
-                "year": ad_y,
-                "district": dist,
-                "move_in": int(mi),
-                "move_out": int(mo),
-                "net_migration": int(mi - mo),
-            })
-
-    result = pd.DataFrame(rows)
-    if len(result):
-        out = DATA_DIR / "net_mig_panel.csv"
-        result.to_csv(out, index=False, encoding="utf-8-sig")
-        n_y = result[result["move_in"] > 0]["year"].nunique()
-        print(f"\n  ✅ {out}  ({len(result)} 筆, 有資料 {n_y} 年)")
-        print("  ℹ  net_mig_rate = net_migration / year_end_pop "
-              "(需自行除以人口)")
-    else:
-        print("  ❌ 無資料產出")
-    return result
-
-
 # ────────────────────────────────────────────────────────────
 # CLI
 # ────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(
-        description="台北市 12 行政區: 教育程度 + 遷徙 資料收集"
+        description="台北市 12 行政區: 教育程度 資料收集"
     )
     parser.add_argument("--probe", action="store_true",
                         help="只 probe API 欄位")
-    parser.add_argument("--only", choices=["edu", "mig"],
-                        help="只跑指定變數")
     args = parser.parse_args()
 
     if args.probe:
@@ -450,29 +325,17 @@ def main():
         probe_fields("ODRP020/106",
                       params={"COUNTY": "臺北市"},
                       label="ODRP020 教育程度 (106=API最早)")
-        probe_fields("ODRP011/11412",
-                      params={"COUNTY": "臺北市"},
-                      label="ODRP011 遷入遷出 (114年12月)")
         probe_fields("ODRP020/104",
                       params={"COUNTY": "臺北市"},
                       label="ODRP020 (104=預期無資料)")
         return
 
-    tasks = {
-        "edu": fetch_edu_ratio,
-        "mig": fetch_net_migration,
-    }
-
-    if args.only:
-        tasks[args.only]()
-    else:
-        for func in tasks.values():
-            try:
-                func()
-            except Exception as e:
-                print(f"\n  ❌ 失敗: {e}")
-                import traceback
-                traceback.print_exc()
+    try:
+        fetch_edu_ratio()
+    except Exception as e:
+        print(f"\n  ❌ 失敗: {e}")
+        import traceback
+        traceback.print_exc()
 
     print("\n" + "="*60)
     print("🏁 完成!")

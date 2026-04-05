@@ -298,14 +298,17 @@ def main():
     # 4. 寬表
     pivot_df = make_pivot_table(long_df)
 
-    # 5. 輸出
+    # 5. 輸出（最終 CSV 存到 data/）
+    data_out = Path("data")
+    data_out.mkdir(parents=True, exist_ok=True)
+
     # 長格式
-    long_path = OUTPUT_DIR / "taipei_housing_type_long.csv"
+    long_path = data_out / "taipei_housing_type_long.csv"
     long_df.to_csv(long_path, index=False, encoding="utf-8-sig")
     print(f"\n✅ 長格式已存: {long_path}")
 
     # 寬格式
-    wide_path = OUTPUT_DIR / "taipei_housing_type_wide.csv"
+    wide_path = data_out / "taipei_housing_type_wide.csv"
     pivot_df.to_csv(wide_path, index=False, encoding="utf-8-sig")
     print(f"✅ 寬格式已存: {wide_path}")
 
@@ -313,7 +316,7 @@ def main():
     print_summary(pivot_df)
 
     # Panel data 格式 (適合迴歸分析)
-    panel_path = OUTPUT_DIR / "taipei_housing_type_panel.csv"
+    panel_path = data_out / "taipei_housing_type_panel.csv"
     panel = pivot_df.copy()
     panel.to_csv(panel_path, index=False, encoding="utf-8-sig")
     print(f"\n✅ Panel 格式已存: {panel_path}")

@@ -21,7 +21,7 @@ TAIPEI_DISTRICTS = {
     "V09": "南港區", "V10": "內湖區", "V11": "士林區", "V12": "北投區",
 }
 
-OUTPUT_CSV = "taipei_pet_registration_2014_2025.csv"
+OUTPUT_CSV = "data/taipei_pet_registration_2014_2025.csv"
 
 
 def fetch_year(year: int, session: requests.Session) -> list:

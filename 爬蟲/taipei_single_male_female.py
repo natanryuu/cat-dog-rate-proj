@@ -20,7 +20,7 @@ import sys
 BASE_URL = "https://www.ris.gov.tw/rs-opendata/api/v1/datastore/ODRP019"
 COUNTY = "臺北市"
 YEARS = list(range(104, 115))  # 104~114（民國）
-OUTPUT_CSV = "data_raw/taipei_single_male_female.csv"
+OUTPUT_CSV = "data/taipei_single_male_female.csv"
 
 # 104~105 年 API 無資料，需從本機 CSV 匯入
 LOCAL_CSV_MAP = {
