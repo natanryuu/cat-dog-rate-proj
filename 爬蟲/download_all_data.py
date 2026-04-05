@@ -50,10 +50,10 @@ def download_real_estate():
     
     base_url = "https://plvr.land.moi.gov.tw/DownloadSeason"
     
-    # 研究期間 2019-2024 = 民國 108-113，每年 4 季
+    # 研究期間 2019-2024 = 民國 104-114，每年 4 季
     # 額外下載 104-107 備用（如果要擴展到 2015-2024）
     seasons = []
-    for roc_year in range(104, 114):   # 104-113 = 2015-2024
+    for roc_year in range(104, 114):   # 104-114 = 2015-2025
         for s in range(1, 5):
             seasons.append(f"{roc_year}S{s}")
     
