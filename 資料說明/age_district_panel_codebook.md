@@ -42,7 +42,7 @@ import pandas as pd
 
 age = pd.read_csv("data_raw/age/age_district_panel.csv")
 
-# 截取研究期間
+# 截取研究期間z
 age = age[age["ad_year"].between(2019, 2024)].rename(columns={"ad_year": "year"})
 
 # 與主資料合併

@@ -20,8 +20,8 @@ warnings.filterwarnings("ignore")
 # ============================================================
 # 設定
 # ============================================================
-OUTPUT_DIR = Path("output")
-OUTPUT_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR = Path("data_raw/building_type")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 台北市 12 行政區
 TAIPEI_DISTRICTS = [
@@ -83,9 +83,8 @@ def download_season_data(roc_year: int, quarter: int, data_dir: Path) -> Path | 
 
 
 def download_all(start_year=2014, end_year=2025) -> Path:
-    """下載所有年度 × 季度的資料"""
-    data_dir = OUTPUT_DIR / "raw"
-    data_dir.mkdir(exist_ok=True)
+    """下載所有年度 × 季度的資料，若該季資料夾已存在則跳過"""
+    data_dir = OUTPUT_DIR  # 季度資料夾直接放在 data_raw/building_type/ 下
 
     for year in range(start_year, end_year + 1):
         roc = ad_to_roc(year)
@@ -314,7 +313,7 @@ def main():
     print_summary(pivot_df)
 
     # Panel data 格式 (適合迴歸分析)
-    panel_path = OUTPUT_DIR / "data_raw/taipei_housing_type_panel.csv"
+    panel_path = OUTPUT_DIR / "taipei_housing_type_panel.csv"
     panel = pivot_df.copy()
     panel.to_csv(panel_path, index=False, encoding="utf-8-sig")
     print(f"\n✅ Panel 格式已存: {panel_path}")
