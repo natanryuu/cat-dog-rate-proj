@@ -31,8 +31,12 @@ matplotlib.rcParams["axes.unicode_minus"] = False
 
 # ── Load ──
 import os
-# 自動偵測路徑：本地 or 雲端
-for path in ["master_panel_final.csv", "data/master_panel_final.csv", "/mnt/user-data/outputs/master_panel_final.csv"]:
+script_dir = os.path.dirname(os.path.abspath(__file__))
+for path in [
+    os.path.join(script_dir, "master_panel_final.csv"),
+    "master_panel_final.csv",
+    "data/master_panel_final.csv",
+]:
     if os.path.exists(path):
         break
 df = pd.read_csv(path, encoding="utf-8-sig")
