@@ -14,7 +14,8 @@
       "WebFetch(domain:www.ris.gov.tw)",
       "Bash(ls /Users/danniryu/Desktop/proj/cat-dog-rate-proj/*.csv)",
       "Bash(curl -s \"https://www.ris.gov.tw/rs-opendata/api/v1/datastore/ODRP019/105?COUNTY=%E8%87%BA%E5%8C%97%E5%B8%82&PAGE=1\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(python plot_cat_dog_ratio.py)"
     ]
   }
 }
