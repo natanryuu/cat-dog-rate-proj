@@ -1,6 +1,6 @@
 IV,r_vs_DV,p_value,Significant_alpha05
-IV_highrise,0.5575,3.7593e-11,Yes
-IV3_single_ratio,0.4896,1.3857e-08,Yes
-IV_elder,0.7227,1.1770e-20,Yes
-IV4_rental_log,0.3388,1.5388e-04,Yes
-IV_edu,0.1703,6.2911e-02,No
+IV_highrise,0.504,7.2255e-10,Yes
+IV3_single_ratio,0.545,1.4206e-11,Yes
+IV_elder,0.7621,2.5866e-26,Yes
+IV4_rental_log,0.4761,7.9123e-09,Yes
+IV_edu,0.2111,0.015111,Yes

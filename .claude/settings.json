@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk 'NR>=325 && NR<=525 && length\\($0\\)<500' /Users/danniryu/Desktop/proj/cat-dog-rate-proj/research_design.html)",
+      "Bash(unzip -o midterm_report.pptx -d /tmp/midterm_pptx_extract)",
+      "Read(//tmp/midterm_pptx_extract/ppt/**)"
+    ]
+  }
+}

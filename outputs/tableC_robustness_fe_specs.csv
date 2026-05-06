@@ -1,0 +1,6 @@
+IV,Hypothesis_sign,A_coef,A_SE,A_p,A_sig,C_coef,C_SE,C_p,C_sig,C_vs_hyp
+IV_highrise,+,-0.19,0.2095,0.3645,No,-0.4906,0.2485,0.04833,Yes,CONTRADICT
+IV3_single,+,0.3735,5.7389,0.9481,No,12.9534,4.3704,0.003038,Yes,match
+IV_elder,-,5.256,5.9352,0.3759,No,5.6816,2.9046,0.05046,No,CONTRADICT
+log_IV4_rental,+,0.0943,0.0635,0.1379,No,0.1244,0.0617,0.04401,Yes,match
+IV_edu,+,-4.7471,2.5144,0.05903,No,0.8598,1.8379,0.6399,No,match
